@@ -4,8 +4,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-#---Program counts terms in text and evaluates term's score---
-
 import sys
 sys.path.append('modules')
 
@@ -45,7 +43,12 @@ if __name__ == "__main__":
     stop_words = tp.get_stop_words()
     #empty word could be in word list represented text as specific of text processing
     stop_words.add("")
-#    print(len(stop_words))
+
+    if len(sys.argv) == 1:
+        print("Usage: python3 " + sys.argv[0] + " <text file(s)>")
+        print("")
+        print("\tProgram counts terms in text files and evaluates term's score")
+        exit()
 
     for iarg in range(1, len(sys.argv)):
         filename = sys.argv[iarg]
