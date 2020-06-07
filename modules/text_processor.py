@@ -39,6 +39,43 @@ class TextProcessor:
         return words
 
 
+    def text_to_sentences(self, text):
+        sentences = re.split("\!|\?|\.", text, flags=re.UNICODE)
+        filtered_sentences = []
+
+        adding_sentence = ""
+        commulative_len = 0
+
+        for sentence in sentences:
+            slen = len(sentence)
+            #need form new sentence
+            processed_sentence = re.sub("^\W+", "", sentence, flags = re.UNICODE)
+            processed_sentence = re.sub("\t|\r|\n", " ", processed_sentence, flags = re.UNICODE)
+            processed_sentence = re.sub("\"", "'", processed_sentence, flags = re.UNICODE)
+
+            if adding_sentence == "":
+#                if sentence == "":
+#                    continue
+                adding_sentence = processed_sentence
+            else:
+                if re.match("^\W*[A-Z]|^\W*[А-Я]", processed_sentence):
+                    #detected start of new sentence
+                    adding_sentence = re.sub("\s+", " ", adding_sentence, flags = re.UNICODE)
+                    filtered_sentences.append(adding_sentence + text[commulative_len-1])
+                    adding_sentence = processed_sentence
+                else:
+                    #join 2 parts of one sentence
+                    adding_sentence = adding_sentence + text[commulative_len-1] + processed_sentence
+
+            commulative_len = commulative_len + slen + 1
+
+        if not adding_sentence == "":
+            adding_sentence = re.sub("\s+", " ", adding_sentence, flags = re.UNICODE)
+            filtered_sentences.append(adding_sentence)
+
+        return filtered_sentences
+
+
     def get_stop_words(self):
         return self.stop_words
 
