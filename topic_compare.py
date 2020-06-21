@@ -37,6 +37,19 @@ def get_topic_indeces(header):
     return topics_indeces
 
 
+def check_topics(topics_labeled_indeces, topics_computed_indeces):
+    success_flag = True
+    for topic in topics_labeled_indeces:
+        if not topic in topics_computed_indeces:
+            print("'" + topic + "' is missed in computed dataset")
+            success_flag = False
+    for topic in topics_computed_indeces:
+        if not topic in topics_labeled_indeces:
+            print("No '" + topic + "' is labeled dataset")
+            success_flag = False
+    return success_flag
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) == 1:
@@ -47,20 +60,20 @@ if __name__ == "__main__":
 
 
     #--read data--
-    (header, topics_labeled) = read_topics(sys.argv[1])
-    (header2, topics) = read_topics(sys.argv[2])
+    (header_labeled, topics_labeled) = read_topics(sys.argv[1])
+    (header_computed, topics_computed) = read_topics(sys.argv[2])
 
     #note: order of topics in labeled file may differs from topics in file with predicted topics
-    topics_indeces = get_topic_indeces(header)
-    topics_indeces2 = get_topic_indeces(header2)
-
+    topics_labeled_indeces = get_topic_indeces(header_labeled)
+    topics_computed_indeces = get_topic_indeces(header_computed)
+    if not check_topics(topics_labeled_indeces, topics_computed_indeces):
+        exit(1)
 
     #--print header--
     header_line = ""
-    topics_names = header.split("\t")
-    topics_names2 = header2.split("\t")
+    topics_labeled_names = header_labeled.split("\t")
 
-    for topic in topics_names:
+    for topic in topics_labeled_names:
         if topic == "File":
             header_line = header_line + "File\tSqrt Error\tMax Error"
         else:
@@ -70,8 +83,8 @@ if __name__ == "__main__":
 
     #--compare topics and print errors--
 
-    for textname in topics:
-        text_topics = topics[textname]
+    for textname in topics_labeled:
+        text_topics_computed = topics_computed[textname]
         text_topics_labeled = topics_labeled[textname]
 
         #labeled text should have all topics
@@ -79,14 +92,11 @@ if __name__ == "__main__":
         max_error = 0.0
         line = ""
 
-        for topic in topics_names:
+        for topic in topics_labeled_names:
             if topic == "File":
                 continue
-            v1 = float(text_topics_labeled[topics_indeces[topic]])
-            if topic in topics_names2:
-                v2 = float(text_topics[topics_indeces2[topic]])
-            else:
-                v2 = 0.0
+            v1 = float(text_topics_labeled[topics_labeled_indeces[topic]])
+            v2 = float(text_topics_computed[topics_computed_indeces[topic]])
             sqrt_error = sqrt_error + (v2 - v1) * (v2 - v1)
             delta = math.fabs(v2 - v1)
             if delta > max_error:
@@ -95,5 +105,5 @@ if __name__ == "__main__":
 
         sqrt_error = math.sqrt(sqrt_error)
 
-        line = text_topics_labeled[topics_indeces["File"]] + "\t" + str(sqrt_error) + "\t" + str(max_error) + line
+        line = text_topics_labeled[topics_labeled_indeces["File"]] + "\t" + str(sqrt_error) + "\t" + str(max_error) + line
         print(line)
