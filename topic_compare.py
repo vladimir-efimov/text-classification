@@ -7,6 +7,7 @@
 
 import sys
 import math
+import argparse
 sys.path.append('modules')
 
 
@@ -52,21 +53,27 @@ def check_topics(topics_labeled_indeces, topics_computed_indeces):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) == 1:
-        print("Usage: python3 " + sys.argv[0] + "<file with labeled topics> <file with predicted topics>")
-        print("")
-        print("\tProgram compares labeled text topics and predicted text topics.")
-        exit()
+    arg_parser = argparse.ArgumentParser(prog = "python3 " + sys.argv[0],
+        description = "Program compares labeled text topics and predicted text topics. " +
+                      "Output format: File  Sqrt error  Max error  Predicted value - labeled value")
+    arg_parser.add_argument("-f", "--format", choices = ["values", "formulas"], default = "formulas",
+        help = "Output format: 'values' or 'formulas' (nice to use in Excel)")
+    arg_parser.add_argument("-c", "--content", choices = ["data", "metrics", "full"], default = "data",
+        help = "Ouput content: 'data', 'metrics' or 'full' (metrics and data - file by file comparison)")
+    arg_parser.add_argument("labeled_topics_file", metavar="<file with labeled topics>")
+    arg_parser.add_argument("predicted_topics_file", metavar = "<file with predicted topics>")
 
+    args = arg_parser.parse_args()
 
     #--read data--
-    (header_labeled, topics_labeled) = read_topics(sys.argv[1])
-    (header_computed, topics_computed) = read_topics(sys.argv[2])
+    (header_labeled, topics_labeled) = read_topics(args.labeled_topics_file)
+    (header_computed, topics_computed) = read_topics(args.predicted_topics_file)
 
     #note: order of topics in labeled file may differs from topics in file with predicted topics
     topics_labeled_indeces = get_topic_indeces(header_labeled)
     topics_computed_indeces = get_topic_indeces(header_computed)
     if not check_topics(topics_labeled_indeces, topics_computed_indeces):
+        sys.stderr.write("Mistmatch of topics set in labeled topics and predicted topics\n");
         exit(1)
 
     #--print header--
@@ -97,11 +104,14 @@ if __name__ == "__main__":
                 continue
             v1 = float(text_topics_labeled[topics_labeled_indeces[topic]])
             v2 = float(text_topics_computed[topics_computed_indeces[topic]])
-            sqrt_error = sqrt_error + (v2 - v1) * (v2 - v1)
+            sqrt_error += (v2 - v1) * (v2 - v1)
             delta = math.fabs(v2 - v1)
             if delta > max_error:
                 max_error = delta
-            line = line + "\t" + str(v2 - v1)
+            if args.format == "values":
+                line += "\t" + str(v2 - v1)
+            else:
+                line += "\t" + "= " + str(v2) + " - " + str(v1)
 
         sqrt_error = math.sqrt(sqrt_error)
 
