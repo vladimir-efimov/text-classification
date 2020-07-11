@@ -10,12 +10,13 @@ import math
 import argparse
 sys.path.append('modules')
 
+val_format="{:3.2f}"
 
 def read_topics(filename):
     f = open(filename)
     header = f.readline().strip()
 
-    #data stored in format: file name -> topics
+    # data stored in format: file name -> topics
     topics = {}
 
     line = f.readline()
@@ -51,6 +52,74 @@ def check_topics(topics_labeled_indeces, topics_computed_indeces):
     return success_flag
 
 
+def compare_topics(topics_labeled, topics_computed, topic_names, topics_labeled_indeces, topics_computed_indeces, format):
+    topics_comparison = []
+    total_sqrt_error = 0.0
+    total_max_error = 0.0
+
+    for textname in topics_labeled:
+        text_topics_computed = topics_computed[textname]
+        text_topics_labeled = topics_labeled[textname]
+        topic_comparison = {}
+
+        sqrt_error = 0.0
+        max_error = 0.0
+        line = ""
+
+        for topic in topic_names:
+            if topic == "File":
+                topic_comparison["File"] = text_topics_labeled[topics_labeled_indeces[topic]]
+                continue
+            v1 = float(text_topics_labeled[topics_labeled_indeces[topic]])
+            v2 = float(text_topics_computed[topics_computed_indeces[topic]])
+            sqrt_error += (v2 - v1) * (v2 - v1)
+            delta = math.fabs(v2 - v1)
+            if format == "values":
+                topic_comparison[topic] = val_format.format(v2 - v1)
+            else:
+                topic_comparison[topic] = "= " + str(v2) + " - " + str(v1)
+
+            if delta > max_error:
+                max_error = delta
+
+        sqrt_error = math.sqrt(sqrt_error)
+        topic_comparison["sqrt_error"] = sqrt_error
+        topic_comparison["max_error"] = max_error
+        topics_comparison.append(topic_comparison)
+        total_sqrt_error += sqrt_error
+        total_max_error += max_error
+
+    metrics = {}
+    metrics["Average sqrt error"] = total_sqrt_error / len(topics_labeled)
+    metrics["Average max error"] = total_max_error / len(topics_labeled)
+    return (metrics, topics_comparison)
+
+
+def print_metrics(metrics):
+    for metric in metrics:
+        print(metric + "\t" + str(metrics[metric]))
+
+
+def print_topics_comparison(topics_comparison, topics_names):
+    # --print header--
+    header_line = "File\tSqrt Error\tMax Error"
+
+    for topic in topics_names:
+        if not topic == "File":
+            header_line += "\t" + topic
+    print(header_line)
+
+    # --print comparison--
+    for topic_comparison in topics_comparison:
+        line = "\t".join([topic_comparison["File"], val_format.format(topic_comparison["sqrt_error"]),
+               val_format.format(topic_comparison["max_error"])])
+
+        for topic in topic_names:
+            line += "\t" + topic_comparison[topic]
+
+        print(line)
+
+
 if __name__ == "__main__":
 
     arg_parser = argparse.ArgumentParser(prog = "python3 " + sys.argv[0],
@@ -65,55 +134,29 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    #--read data--
+    # --read data--
     (header_labeled, topics_labeled) = read_topics(args.labeled_topics_file)
     (header_computed, topics_computed) = read_topics(args.predicted_topics_file)
 
-    #note: order of topics in labeled file may differs from topics in file with predicted topics
+    # note: order of topics in labeled file may differs from topics in file with predicted topics
     topics_labeled_indeces = get_topic_indeces(header_labeled)
     topics_computed_indeces = get_topic_indeces(header_computed)
     if not check_topics(topics_labeled_indeces, topics_computed_indeces):
         sys.stderr.write("Mistmatch of topics set in labeled topics and predicted topics\n");
         exit(1)
 
-    #--print header--
-    header_line = ""
-    topics_labeled_names = header_labeled.split("\t")
+    # --compare topics--
+    topic_names = header_labeled.split("\t")
+    (metrics, topics_comparison) = compare_topics(topics_labeled, topics_computed, topic_names,
+                                                  topics_labeled_indeces, topics_computed_indeces, args.format)
 
-    for topic in topics_labeled_names:
-        if topic == "File":
-            header_line = header_line + "File\tSqrt Error\tMax Error"
-        else:
-            header_line = header_line + "\t" + topic
-    print(header_line)
+    #--output results--
+    if args.content in ["metrics", "full"]:
+        print_metrics(metrics)
 
+    if args.content == "full":
+        print("")
 
-    #--compare topics and print errors--
+    if args.content in ["data", "full"]:
+        print_topics_comparison(topics_comparison, topic_names)
 
-    for textname in topics_labeled:
-        text_topics_computed = topics_computed[textname]
-        text_topics_labeled = topics_labeled[textname]
-
-        #labeled text should have all topics
-        sqrt_error = 0.0
-        max_error = 0.0
-        line = ""
-
-        for topic in topics_labeled_names:
-            if topic == "File":
-                continue
-            v1 = float(text_topics_labeled[topics_labeled_indeces[topic]])
-            v2 = float(text_topics_computed[topics_computed_indeces[topic]])
-            sqrt_error += (v2 - v1) * (v2 - v1)
-            delta = math.fabs(v2 - v1)
-            if delta > max_error:
-                max_error = delta
-            if args.format == "values":
-                line += "\t" + str(v2 - v1)
-            else:
-                line += "\t" + "= " + str(v2) + " - " + str(v1)
-
-        sqrt_error = math.sqrt(sqrt_error)
-
-        line = text_topics_labeled[topics_labeled_indeces["File"]] + "\t" + str(sqrt_error) + "\t" + str(max_error) + line
-        print(line)
