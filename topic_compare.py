@@ -57,6 +57,12 @@ def compare_topics(topics_labeled, topics_computed, topic_names, topics_labeled_
     total_sqrt_error = 0.0
     total_max_error = 0.0
 
+    topic_errors = {}
+    for topic in topic_names:
+        if topic == "File":
+            continue
+        topic_errors[topic] = (0.0, 0.0)
+
     for textname in topics_labeled:
         text_topics_computed = topics_computed[textname]
         text_topics_labeled = topics_labeled[textname]
@@ -82,6 +88,12 @@ def compare_topics(topics_labeled, topics_computed, topic_names, topics_labeled_
             if delta > max_error:
                 max_error = delta
 
+            (topic_total_error, topic_error_mean) = topic_errors[topic]
+            topic_total_error += (v2 - v1) * (v2 - v1)
+            topic_error_mean += v2 - v1
+            topic_errors[topic] = (topic_total_error, topic_error_mean)
+
+
         sqrt_error = math.sqrt(sqrt_error)
         topic_comparison["sqrt_error"] = sqrt_error
         topic_comparison["max_error"] = max_error
@@ -90,14 +102,24 @@ def compare_topics(topics_labeled, topics_computed, topic_names, topics_labeled_
         total_max_error += max_error
 
     metrics = {}
+    metrics["Total sqrt error"] = total_sqrt_error
+    metrics["Total max error"] = total_max_error
     metrics["Average sqrt error"] = total_sqrt_error / len(topics_labeled)
     metrics["Average max error"] = total_max_error / len(topics_labeled)
+    metrics["topics_metrics"] = topic_errors
     return (metrics, topics_comparison)
 
 
 def print_metrics(metrics):
     for metric in metrics:
+        if metric == "topics_metrics":
+            continue
         print(metric + "\t" + str(metrics[metric]))
+    print("")
+    print("Topic\tSqrt error\tError mean (>0 - predicted more than labeled)")
+    for topic in metrics["topics_metrics"]:
+        (topic_total_error, topic_error_mean) = metrics["topics_metrics"][topic]
+        print("\t".join([topic,str(topic_total_error),str(topic_error_mean)]))
 
 
 def print_topics_comparison(topics_comparison, topics_names):
