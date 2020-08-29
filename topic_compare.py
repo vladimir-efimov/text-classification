@@ -9,24 +9,9 @@ import sys
 import math
 import argparse
 sys.path.append('modules')
+from topic_reader import read_topics
 
 val_format="{:3.2f}"
-
-def read_topics(filename):
-    f = open(filename)
-    header = f.readline().strip()
-
-    # data stored in format: file name -> topics
-    topics = {}
-
-    line = f.readline()
-    while line:
-        text_topics = line.strip().split("\t")
-        topics[text_topics[0]] = text_topics
-        line = f.readline()
-
-    f.close()
-    return (header, topics)
 
 
 def get_topic_indeces(header):
