@@ -58,9 +58,9 @@ if __name__ == "__main__":
         num_documents = num_documents + 1
 
         count_term_entries(text, tp, term_count, term_document_count)
-        
+
         f.close()
-        
+
 
     for (term, count) in term_count.items():
         term_score[term] = get_term_score(count, term_document_count[term], num_documents)
