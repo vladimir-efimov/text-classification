@@ -12,15 +12,13 @@ from modules.table_comparator import compare_table_data
 val_format = "{:3.2f}"
 
 
-def print_metrics(metrics):
+def print_metrics(metrics, metrics_per_topic):
     for metric in metrics:
-        if metric == "Property_metrics":
-            continue
         print(metric + "\t" + str(metrics[metric]))
     print("")
     print("\t".join(["Topic", "Sqrt error", "Error mean (>0 - predicted more than labeled)"]))
-    for topic in metrics["Property_metrics"]:
-        (topic_total_error, topic_error_mean) = metrics["Property_metrics"][topic]
+    for topic in metrics_per_topic:
+        (topic_total_error, topic_error_mean) = metrics_per_topic[topic]
         print("\t".join([topic, str(topic_total_error), str(topic_error_mean)]))
 
 
@@ -70,12 +68,12 @@ if __name__ == "__main__":
     topic_names = header_labeled.split("\t")
 
     # --compare topics--
-    (metrics, topics_comparison) = compare_table_data(header_labeled, topics_labeled,
+    (metrics, errors_by_property, topics_comparison) = compare_table_data(header_labeled, topics_labeled,
                                                       header_computed, topics_computed, args.format == "formulas")
 
     # --output results--
     if args.content in ["metrics", "full"]:
-        print_metrics(metrics)
+        print_metrics(metrics, errors_by_property)
 
     if args.content == "full":
         print("")

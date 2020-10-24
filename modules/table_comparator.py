@@ -11,10 +11,10 @@ val_format = "{:3.2f}"
 
 # Compares table data presented as dictionary, where key - entry name,
 # value - list of properties for entry described by header
-# Returns metrics and value-by-value comparison as list of dictionaries
+# Returns metrics, errors by property and value-by-value comparison as list of dictionaries
 def compare_table_data(header_line1, data_dict1, header_line2, data_dict2, output_formulas=False):
     dataset_comparison = []
-    errors_by_property = {}
+    metrics_per_property = {}
     total_sqrt_error = 0.0
     total_max_error = 0.0
 
@@ -25,7 +25,7 @@ def compare_table_data(header_line1, data_dict1, header_line2, data_dict2, outpu
     properties = header_line1.split("\t")[1:]
 
     for property_name in properties:
-        errors_by_property[property_name] = (0.0, 0.0)
+        metrics_per_property[property_name] = (0.0, 0.0)
 
     for entry_name in data_dict1:
         entry_values1 = data_dict1[entry_name]
@@ -48,10 +48,10 @@ def compare_table_data(header_line1, data_dict1, header_line2, data_dict2, outpu
             if delta > max_error:
                 max_error = delta
 
-            (property_total_error, property_error_mean) = errors_by_property[property_name]
+            (property_total_error, property_error_mean) = metrics_per_property.get(property_name)
             property_total_error += (v2 - v1) * (v2 - v1)
             property_error_mean += v2 - v1
-            errors_by_property[property_name] = (property_total_error, property_error_mean)
+            metrics_per_property[property_name] = (property_total_error, property_error_mean)
 
         sqrt_error = math.sqrt(sqrt_error)
         entry_comparison["sqrt_error"] = sqrt_error
@@ -62,8 +62,8 @@ def compare_table_data(header_line1, data_dict1, header_line2, data_dict2, outpu
 
     metrics = {"Total sqrt error": total_sqrt_error, "Total max error": total_max_error,
                "Average sqrt error": total_sqrt_error / len(data_dict1),
-               "Average max error": total_max_error / len(data_dict2), "Property_metrics": errors_by_property}
-    return metrics, dataset_comparison
+               "Average max error": total_max_error / len(data_dict1)}
+    return metrics, metrics_per_property, dataset_comparison
 
 
 def get_property_indexes(header_line):
