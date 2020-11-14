@@ -7,10 +7,14 @@
 import math
 
 val_format = "{:3.2f}"
+percentage_format = "{:3.2f}%"
+formula_format = "= {:3.2f} - {:3.2f}"
+formula_percentage_format = "= {:3.2f}% - {:3.2f}%"
 
 
 # Compares table data presented as dictionary, where key - entry name,
-# value - list of properties for entry described by header
+# value - list of values for entry for each property listed in header
+# value for entry could be string represented float or in percentage value
 # Returns metrics, errors by property and value-by-value comparison as list of dictionaries
 def compare_table_data(header_line1, data_dict1, header_line2, data_dict2, output_formulas=False):
     dataset_comparison = []
@@ -36,14 +40,23 @@ def compare_table_data(header_line1, data_dict1, header_line2, data_dict2, outpu
         max_error = 0.0
 
         for property_name in properties:
-            v1 = float(entry_values1[properties_indexes1[property_name]])
-            v2 = float(entry_values2[properties_indexes2[property_name]])
+            v1str = entry_values1[properties_indexes1[property_name]]
+            v1 = float(v1str) if not str(v1str).endswith("%") else float(v1str.replace('%', '')) / 100.0
+            v2str = entry_values2[properties_indexes2[property_name]]
+            v2 = float(v2str) if not str(v2str).endswith("%") else float(v2str.replace('%', '')) / 100.0
             sqrt_error += (v2 - v1) * (v2 - v1)
             delta = math.fabs(v2 - v1)
+
             if output_formulas:
-                entry_comparison[property_name] = "= " + str(v2) + " - " + str(v1)
+                if v1str.endswith("%") or v2str.endswith("%"):
+                    entry_comparison[property_name] = formula_percentage_format.format(v2 * 100.0, v1 * 100.0)
+                else:
+                    entry_comparison[property_name] = formula_format.format(v2, v1)
             else:
-                entry_comparison[property_name] = val_format.format(v2 - v1)
+                if v1str.endswith("%") or v2str.endswith("%"):
+                    entry_comparison[property_name] = percentage_format.format((v2 - v1) * 100.0)
+                else:
+                    entry_comparison[property_name] = val_format.format(v2 - v1)
 
             if delta > max_error:
                 max_error = delta
