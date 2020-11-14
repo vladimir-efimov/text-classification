@@ -5,22 +5,22 @@
 # LICENSE file in the root directory of this source tree.
 
 import sys
-sys.path.append('modules')
-from topic_reader import read_topics
-val_format="{:3.2f}%"
+from modules.tsv_reader import read_tsv_file
+val_format = "{:3.2f}%"
 
-#return index in topic_stat which corresponds to topic majority 
+
+# return index in topic_stat which corresponds to topic majority
 def get_topic_majority(weight):
     if weight > 0.7:
-        #main topic
+        # main topic
         return 0
     if weight > 0.5:
-        #major topic
+        # major topic
         return 1
     if weight > 0.2:
-        #topic presents
+        # topic presents
         return 2
-    #topic absents
+    # topic absents
     return 3
 
 
@@ -30,24 +30,22 @@ def compute_topic_stat(header, documents_topics):
     topics.remove("File")
 
     for topic_name in topics:
-        if topic_name == "File":
-            continue
-        topic_stat[topic_name] = [0, 0, 0, 0]
+        topic_stat[topic_name] = [0.0, 0.0, 0.0, 0.0]
 
     for document_name  in documents_topics:
         document_topics = documents_topics[document_name]
 
         i = 0
         for topic_name in topics:
-            i += 1
             majority_index = get_topic_majority(float(document_topics[i]))
             topic_stat[topic_name][majority_index] += 1
+            i += 1
 
-    #compute percentage
+    # compute percentage
     ndocs = len(documents_topics)
     for topic_name in topics:
-        for j in range(0,4):
-            topic_stat[topic_name][j] = float(topic_stat[topic_name][j]) / ndocs * 100
+        for j in range(0, 4):
+            topic_stat[topic_name][j] = float(topic_stat[topic_name][j]) / float(ndocs) * 100.0
 
     return topic_stat
 
@@ -62,7 +60,10 @@ if __name__ == "__main__":
         exit()
 
     filename = sys.argv[1]
-    (header, documents_topics) = read_topics(filename)
+    (header, documents_topics) = read_tsv_file(filename)
+    if not header.startswith("File"):
+        sys.stderr.write("Unsupported file format: first column should have name 'File'\n")
+        exit(1)
 
     topic_stat = compute_topic_stat(header, documents_topics)
 
@@ -72,4 +73,3 @@ if __name__ == "__main__":
         for value in topic_stat[topic_name]:
             line += "\t" + val_format.format(value)
         print(line)
-
