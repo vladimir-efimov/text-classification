@@ -10,7 +10,6 @@ import modules.text_processor_normalize as tpn
 from modules.term_scoring import get_term_score
 
 
-# todo: rewrite for analyzing of sentence
 def count_term_entries(sentences, tp, term_count, term_document_count, topics_words):
     document_terms = set()
 

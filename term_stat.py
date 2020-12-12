@@ -9,6 +9,7 @@ sys.path.append("modules")
 import modules.text_processor_normalize as tpn
 from modules.term_scoring import get_term_score
 
+
 def count_term_entries(text, tp, term_count, term_document_count):
     try:
         document_terms = set()
