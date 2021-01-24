@@ -5,9 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import sys
-sys.path.append('modules')
 
-import text_processor
+import modules.text_processor as mtp
 
 
 def split_text(text, tp):
@@ -30,7 +29,7 @@ if __name__ == "__main__":
         print("\t<filename> <tab> <sentence>")
         exit()
 
-    tp = text_processor.TextProcessor("stop_words.txt")
+    tp = mtp.TextProcessor("stop_words.txt")
     print("File\tSentence")
 
     for iarg in range(1, len(sys.argv)):

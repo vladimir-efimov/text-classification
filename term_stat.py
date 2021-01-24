@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import sys
-sys.path.append("modules")
 import modules.text_processor_normalize as tpn
 from modules.term_scoring import get_term_score
 

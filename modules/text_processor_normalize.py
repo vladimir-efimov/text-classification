@@ -4,12 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import text_processor as tp
+from .text_processor import TextProcessor
 import re
 import pymorphy2
 
 
-class TextProcessorNormalize(tp.TextProcessor):
+class TextProcessorNormalize(TextProcessor):
 
     def __init__(self, filename):
         super().__init__(filename)
