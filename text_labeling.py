@@ -7,7 +7,6 @@
 
 import sys
 import math
-sys.path.append('modules')
 
 
 if __name__ == "__main__":

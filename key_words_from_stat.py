@@ -6,7 +6,6 @@
 
 import sys
 import argparse
-sys.path.append("modules")
 from modules.tsv_reader import read_tsv_file
 from modules.table_comparator import get_property_indexes
 

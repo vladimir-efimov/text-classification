@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import sys
-sys.path.append("modules")
 import modules.text_processor_normalize as tpn
 from modules.term_scoring import get_term_score
 
@@ -50,7 +49,7 @@ if __name__ == "__main__":
     stop_words.add("")
 
     if len(sys.argv) == 1:
-        print("Usage: python3 " + sys.argv[0] + " <file with labeled text")
+        print("Usage: python3 " + sys.argv[0] + " <file with labeled text>")
         print("")
         print("\tProgram counts terms in labeled text and evaluates term's score as for not labeled text")
         print("\tAdditionally program calculates words distribution across topics")
