@@ -32,7 +32,7 @@ class TopicKeyWordVectorModel(WordVectorModel):
         with open(filename) as fin:
             line = fin.readline()
             while line:
-                line = line.replace(" ", "")
+                line = line.replace(", ", ",").replace(": ", ":")
                 if ":" in line:
                     (topic, key_words_str) = line.split(":")
                     topics.append(topic)
