@@ -15,13 +15,22 @@ class TextProcessorNormalize(TextProcessor):
         super().__init__(filename)
         self.analyzer = pymorphy2.MorphAnalyzer()
 
-
     def text_to_words(self, text):
-        all_words = re.split("\W*\s+\W*", text, flags=re.UNICODE)
+        preprocessed_text = self.preprocess_text(text)
+        all_words = re.split("\W*\s+\W*", preprocessed_text, flags=re.UNICODE)
         words = []
         for word in all_words:
-            if not word in self.stop_words:
+            if word not in self.stop_words:
                 normalized_word = self.analyzer.parse(word)[0].normal_form
                 words.append(normalized_word)
         return words
 
+    def sentence_to_words(self, sentence):
+        preprocessed_sentence = re.sub("[!?.]+$", "", sentence, flags=re.UNICODE).lower()
+        all_words = re.split("\W*\s+\W*", preprocessed_sentence, flags=re.UNICODE)
+        words = []
+        for word in all_words:
+            if word not in self.stop_words:
+                normalized_word = self.analyzer.parse(word)[0].normal_form
+                words.append(normalized_word)
+        return words

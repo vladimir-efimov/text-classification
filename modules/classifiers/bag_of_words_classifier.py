@@ -21,8 +21,7 @@ class BagOfWordsClassifier:
         self.text_processor = text_processor
 
     def _get_text_vector(self, text):
-        preprocessed_text = self.text_processor.preprocess_text(text)
-        words = self.text_processor.text_to_words(preprocessed_text)
+        words = self.text_processor.text_to_words(text)
         vec_len = self.model.get_vector_length()
         sum_vector = np.zeros(vec_len)
 

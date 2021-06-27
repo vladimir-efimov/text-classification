@@ -26,12 +26,22 @@ class TextProcessor:
 
 
     def preprocess_text(self, text):
-        #return re.sub("^\W+|\W+$", "", text, flags=re.UNICODE).lower()
         return re.sub("^\W+|\W+$|\!|\,|\?|\.", " ", text, flags=re.UNICODE).lower()
 
 
     def text_to_words(self, text):
-        all_words = re.split("\W*\s+\W*", text, flags=re.UNICODE)
+        preprocessed_text = self.preprocess_text(text)
+        all_words = re.split("\W*\s+\W*", preprocessed_text, flags=re.UNICODE)
+        words = []
+        for word in all_words:
+            if not word in self.stop_words:
+                words.append(word)
+        return words
+
+
+    def sentence_to_words(self, sentence):
+        preprocessed_sentence = re.sub("[\!,\?,\.]+$", "", sentence, flags=re.UNICODE).lower()
+        all_words = re.split("\W*\s+\W*", preprocessed_sentence, flags=re.UNICODE)
         words = []
         for word in all_words:
             if not word in self.stop_words:

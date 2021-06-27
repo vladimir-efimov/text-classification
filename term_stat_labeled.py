@@ -13,7 +13,7 @@ def count_term_entries(sentences, tp, term_count, term_document_count, topics_wo
     document_terms = set()
 
     for (sentence, topic) in sentences:
-        words = tp.text_to_words(sentence)
+        words = tp.sentence_to_words(sentence)
         if topic != "" and topic not in topics_words:
             topics_words[topic] = {}
         for word in words:
@@ -68,7 +68,6 @@ if __name__ == "__main__":
             filename = line_parts[0]
             sentence = line_parts[1]
             topic = "" if len(line_parts) == 2 else line_parts[2]
-            text = text_processor.preprocess_text(sentence)
 
             if filename == old_filename or old_filename == "":
                 sentences.append((sentence, topic))
