@@ -12,7 +12,6 @@ from modules.term_scoring import get_term_score
 def count_term_entries(text, tp, term_count, term_document_count):
     try:
         document_terms = set()
-
         words = tp.text_to_words(text)
         for word in words:
             if word in term_count:
@@ -50,7 +49,6 @@ if __name__ == "__main__":
         filename = sys.argv[iarg]
         f = open(filename)
         text = f.read()
-        text = text_processor.preprocess_text(text)
         num_documents = num_documents + 1
 
         count_term_entries(text, text_processor, term_count, term_document_count)
