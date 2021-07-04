@@ -1,0 +1,2 @@
+sport: basketball, tennis, football
+tourism: hotel, resort, tour
