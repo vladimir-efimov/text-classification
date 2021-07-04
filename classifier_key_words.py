@@ -27,6 +27,9 @@ if __name__ == "__main__":
 
     topics = model.get_topics()
     print("File\t" + "\t".join(topics))
+    if len(topics) == 0:
+        print("Error: no topics are loaded")
+        exit(1)
 
     for iarg in range(2, len(sys.argv)):
         filename = sys.argv[iarg]
